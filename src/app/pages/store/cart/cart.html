@@ -1,0 +1,46 @@
+<div class="min-h-screen bg-gray-50 py-12">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    <h1 class="text-3xl font-extrabold text-slate-900 mb-8">Tu Carrito</h1>
+
+    <!-- Carrito Vacío -->
+    <div *ngIf="cartService.cartItems().length === 0" class="text-center py-20 bg-white rounded-2xl shadow-sm">
+      <h2 class="text-xl font-bold text-slate-900 mb-2">Tu carrito está vacío</h2>
+      <p class="text-slate-500 mb-6">Parece que aún no has agregado nada.</p>
+      <a routerLink="/productos" class="bg-slate-900 text-white px-6 py-3 rounded-lg font-medium hover:bg-slate-800">Ir al Catálogo</a>
+    </div>
+
+    <!-- Carrito con Productos -->
+    <div *ngIf="cartService.cartItems().length > 0" class="flex flex-col lg:flex-row gap-8">
+      
+      <div class="flex-1 space-y-4">
+        <div *ngFor="let item of cartService.cartItems()" class="bg-white p-4 rounded-2xl shadow-sm flex items-center gap-4 border border-gray-100">
+          <img [src]="item.variant.product.images[0]?.url || 'https://via.placeholder.com/150'" class="w-24 h-24 object-cover rounded-xl bg-gray-100">
+          
+          <div class="flex-1">
+            <h3 class="font-bold text-slate-900">{{ item.variant.product.name }}</h3>
+            <p class="text-sm text-slate-500">Variante: {{ item.variant.name }}</p>
+            <p class="text-lg font-bold text-slate-900 mt-2">S/ {{ item.variant.price || item.variant.product.price }}</p>
+          </div>
+
+          <div class="flex flex-col items-end gap-2">
+            <span class="text-sm font-medium text-slate-600 bg-gray-100 px-3 py-1 rounded-lg">Cant: {{ item.quantity }}</span>
+            <button (click)="removeItem(item.id)" class="text-red-500 hover:text-red-700 text-sm font-medium">Eliminar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="w-full lg:w-80">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 sticky top-24">
+          <h2 class="text-lg font-bold text-slate-900 mb-4 border-b pb-4">Resumen</h2>
+          <div class="flex justify-between font-bold text-xl text-slate-900 mt-4">
+            <span>Total</span>
+            <span>S/ {{ getTotal() }}</span>
+          </div>
+          <button class="w-full mt-6 bg-slate-900 text-white py-3 rounded-xl font-bold hover:bg-slate-800">
+            Proceder al Pago
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

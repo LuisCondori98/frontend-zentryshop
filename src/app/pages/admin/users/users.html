@@ -1,0 +1,164 @@
+<div class="max-w-7xl mx-auto pb-12 relative">
+  
+  <!-- Encabezado y Buscador -->
+  <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Gestión de Usuarios</h1>
+      <p class="text-sm text-slate-500 mt-1">Administra los clientes y administradores de tu tienda.</p>
+    </div>
+    
+    <!-- Buscador -->
+    <div class="relative w-full md:w-96">
+      <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+      </div>
+      <input type="text" 
+             [(ngModel)]="searchTerm" 
+             (input)="filterUsers()"
+             placeholder="Buscar por nombre o DNI..." 
+             class="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-slate-900 outline-none shadow-sm text-sm">
+    </div>
+  </div>
+
+  <!-- Loader -->
+  <div *ngIf="isLoading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
+    <div *ngFor="let i of [1,2,3]" class="bg-white rounded-2xl h-52 border border-gray-100"></div>
+  </div>
+
+  <!-- Grid de Tarjetas -->
+  <div *ngIf="!isLoading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    
+    <div *ngFor="let user of filteredUsers" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 relative">
+      
+      <!-- Botones de acción -->
+      <div class="absolute top-4 right-4 flex gap-2">
+        <button (click)="openEditModal(user)" class="p-2 text-slate-500 hover:text-slate-900 bg-gray-50 rounded-lg hover:bg-gray-200 transition-colors" title="Editar usuario">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+        </button>
+        <button (click)="deleteUser(user.id)" class="p-2 text-red-500 hover:text-white bg-red-50 rounded-lg hover:bg-red-500 transition-colors" title="Eliminar usuario">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+        </button>
+      </div>
+
+      <!-- Cabecera de la Tarjeta -->
+      <div class="flex items-center gap-4 mb-4 pr-16">
+        <div class="w-14 h-14 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xl shadow-inner flex-shrink-0">
+          {{ user.firstName?.charAt(0) || user.email.charAt(0) | uppercase }}
+        </div>
+        <div class="min-w-0">
+          <h3 class="text-lg font-bold text-slate-900 truncate">
+            {{ user.firstName ? user.firstName + ' ' + (user.lastName || '') : 'Usuario Nuevo' }}
+          </h3>
+          
+          <span *ngIf="user.role === 'ADMIN'" class="inline-flex items-center mt-1 px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-700 uppercase tracking-wide">
+            Administrador
+          </span>
+          <span *ngIf="user.role === 'CUSTOMER'" class="inline-flex items-center mt-1 px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700 uppercase tracking-wide">
+            Cliente
+          </span>
+        </div>
+      </div>
+
+      <!-- Datos del Usuario -->
+      <div class="space-y-2.5 text-sm text-slate-600 border-t border-gray-100 pt-4">
+        <div class="flex items-center gap-2.5 truncate">
+          <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+          {{ user.email }}
+        </div>
+        <div class="flex items-center gap-2.5">
+          <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"></path></svg>
+          {{ user.documentType || 'Doc' }}: {{ user.documentNumber || 'No registrado' }}
+        </div>
+        <div class="flex items-center gap-2.5">
+          <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+          {{ user.phone || 'Sin teléfono' }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Si no hay resultados -->
+    <div *ngIf="filteredUsers.length === 0" class="col-span-1 md:col-span-2 lg:col-span-3 text-center py-16 bg-white rounded-2xl border border-gray-100">
+      <p class="text-slate-500 text-lg">No se encontraron usuarios con ese nombre o documento.</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL DE EDICIÓN DE USUARIO                -->
+<!-- ========================================== -->
+<div *ngIf="isEditModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fade-in">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden transform transition-all">
+    
+    <!-- Cabecera del Modal -->
+    <div class="flex justify-between items-center p-6 border-b border-gray-100">
+      <h3 class="text-xl font-bold text-slate-900">Editar Usuario</h3>
+      <button (click)="closeEditModal()" class="text-slate-400 hover:text-slate-900 transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+
+    <!-- Formulario del Modal -->
+    <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+      
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">Nombres</label>
+          <input type="text" [(ngModel)]="editingUser.firstName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">Apellidos</label>
+          <input type="text" [(ngModel)]="editingUser.lastName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Correo Electrónico</label>
+        <input type="email" [(ngModel)]="editingUser.email" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none bg-gray-50 text-slate-500 cursor-not-allowed" readonly>
+        <p class="text-xs text-slate-400 mt-1">El correo no se puede cambiar.</p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">Tipo Doc.</label>
+          <select [(ngModel)]="editingUser.documentType" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none bg-white">
+            <option value="DNI">DNI</option>
+            <option value="RUC">RUC</option>
+            <option value="CE">CE</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">Número Doc.</label>
+          <input type="text" [(ngModel)]="editingUser.documentNumber" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Teléfono</label>
+        <input type="text" [(ngModel)]="editingUser.phone" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none">
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Rol del Usuario</label>
+        <select [(ngModel)]="editingUser.role" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none bg-white">
+          <option value="CUSTOMER">Cliente</option>
+          <option value="ADMIN">Administrador</option>
+        </select>
+        <p class="text-xs text-slate-400 mt-1">Cambiar a Administrador le dará acceso total al panel.</p>
+      </div>
+
+    </div>
+
+    <!-- Footer del Modal -->
+    <div class="p-6 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
+      <button (click)="closeEditModal()" class="px-5 py-2.5 rounded-lg font-medium text-slate-600 hover:bg-gray-200 transition-colors">
+        Cancelar
+      </button>
+      <button (click)="saveUserChanges()" [disabled]="isSaving" class="bg-slate-900 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-slate-800 transition-colors disabled:opacity-50 flex items-center gap-2">
+        <svg *ngIf="isSaving" class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+        {{ isSaving ? 'Guardando...' : 'Guardar Cambios' }}
+      </button>
+    </div>
+
+  </div>
+</div>

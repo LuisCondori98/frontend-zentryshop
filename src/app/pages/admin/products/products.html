@@ -1,0 +1,205 @@
+<div class="max-w-7xl mx-auto pb-12">
+  
+  <!-- Encabezado -->
+  <div class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div>
+      <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Gestión de Productos</h1>
+      <p class="text-sm text-slate-500 mt-1">Administra tu catálogo, precios y stock.</p>
+    </div>
+    <button (click)="openForm()" class="bg-slate-900 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-slate-800 transition-colors text-sm flex items-center gap-2">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+      Nuevo Producto
+    </button>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- VISTA 1: TABLA DE PRODUCTOS                -->
+  <!-- ========================================== -->
+  <div *ngIf="!showForm" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    
+    <div *ngIf="isLoadingList" class="p-12 text-center">
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-slate-200 border-t-slate-900"></div>
+    </div>
+
+    <div class="overflow-x-auto" *ngIf="!isLoadingList">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-gray-50 text-slate-500 text-xs uppercase tracking-wider border-b border-gray-100">
+            <th class="px-6 py-4 font-semibold">Producto</th>
+            <th class="px-6 py-4 font-semibold">Categoría</th>
+            <th class="px-6 py-4 font-semibold">Precio</th>
+            <th class="px-6 py-4 font-semibold">Etiquetas</th>
+            <th class="px-6 py-4 font-semibold text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100 text-sm">
+          <tr *ngFor="let prod of products" class="hover:bg-gray-50 transition-colors">
+            
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-3">
+                <img [src]="prod.images[0]?.url || 'https://via.placeholder.com/50'" class="w-10 h-10 rounded-lg object-cover bg-gray-100">
+                <div>
+                  <div class="font-bold text-slate-900">{{ prod.name }}</div>
+                  <div class="text-xs text-slate-500">SKU: {{ prod.sku || 'N/A' }}</div>
+                </div>
+              </div>
+            </td>
+
+            <td class="px-6 py-4 text-slate-600">{{ prod.category?.name || 'General' }}</td>
+            
+            <td class="px-6 py-4 font-bold text-slate-900">S/ {{ prod.price }}</td>
+            
+            <td class="px-6 py-4">
+              <div class="flex flex-col gap-1">
+                <span *ngIf="prod.isFeatured" class="inline-flex items-center w-max px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-700 uppercase">Destacado</span>
+                <span *ngIf="prod.isOnSale" class="inline-flex items-center w-max px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-700 uppercase">En Oferta</span>
+                <span *ngIf="!prod.isFeatured && !prod.isOnSale" class="text-xs text-slate-400">-</span>
+              </div>
+            </td>
+
+            <td class="px-6 py-4 text-right">
+              <button (click)="editProduct(prod)" class="text-slate-400 hover:text-slate-900 transition-colors p-2" title="Editar">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+              </button>
+              <button (click)="deleteProduct(prod.id)" class="text-red-400 hover:text-red-600 transition-colors p-2 ml-1" title="Eliminar">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- VISTA 2: FORMULARIO DE CREACIÓN/EDICIÓN    -->
+  <!-- ========================================== -->
+  <div *ngIf="showForm" class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden animate-fade-in">
+    <form [formGroup]="productForm" (ngSubmit)="onSubmit()">
+      
+      <div class="p-8 space-y-8">
+        <div class="flex justify-between items-center border-b border-gray-100 pb-4">
+          <h2 class="text-xl font-bold text-slate-900">{{ isEditing ? 'Editar Producto' : 'Nuevo Producto' }}</h2>
+          <button type="button" (click)="closeForm()" class="text-slate-400 hover:text-slate-900">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          </button>
+        </div>
+
+        <!-- Sección 1: Datos Básicos -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Nombre del Producto <span class="text-red-500">*</span></label>
+            <input type="text" formControlName="name" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Slug (URL) <span class="text-red-500">*</span></label>
+            <input type="text" formControlName="slug" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none">
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-slate-700 mb-1">Descripción</label>
+            <textarea formControlName="description" rows="2" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none"></textarea>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Precio Base (S/) <span class="text-red-500">*</span></label>
+            <input type="number" formControlName="price" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Categoría <span class="text-red-500">*</span></label>
+            <select formControlName="categoryId" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none bg-white">
+              <option value="" disabled>Seleccione una categoría</option>
+              <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Sección 2: Etiquetas (Destacado / Oferta) -->
+        <div class="bg-slate-50 p-6 rounded-xl border border-slate-100 flex flex-col sm:flex-row gap-6">
+          <label class="flex items-center gap-3 cursor-pointer">
+            <input type="checkbox" formControlName="isFeatured" class="w-5 h-5 text-slate-900 rounded focus:ring-slate-900 border-gray-300">
+            <div>
+              <span class="block text-sm font-bold text-slate-900">Producto Destacado</span>
+              <span class="block text-xs text-slate-500">Aparecerá en la página de inicio (Home).</span>
+            </div>
+          </label>
+          
+          <label class="flex items-center gap-3 cursor-pointer">
+            <input type="checkbox" formControlName="isOnSale" class="w-5 h-5 text-red-600 rounded focus:ring-red-600 border-gray-300">
+            <div>
+              <span class="block text-sm font-bold text-slate-900">En Oferta</span>
+              <span class="block text-xs text-slate-500">Se mostrará con la etiqueta de descuento.</span>
+            </div>
+          </label>
+        </div>
+
+        <!-- Sección 3: Imagen -->
+        <div>
+          <h3 class="text-sm font-bold text-slate-900 mb-2">Imagen Principal</h3>
+          <div class="flex items-center justify-center w-full">
+            <label for="dropzone-file" class="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 relative overflow-hidden">
+              <div class="flex flex-col items-center justify-center pt-5 pb-6" *ngIf="!previewUrl">
+                <svg class="w-8 h-8 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                <p class="text-sm text-slate-500"><span class="font-semibold">Subir imagen</span></p>
+              </div>
+              <img *ngIf="previewUrl" [src]="previewUrl" class="absolute inset-0 w-full h-full object-contain p-4 bg-white">
+              <input id="dropzone-file" type="file" class="hidden" (change)="onFileSelected($event)" accept="image/*" />
+            </label>
+          </div>
+        </div>
+
+        <!-- Sección 4: Variantes (Tallas/Colores) -->
+                <!-- Sección 4: Variantes (Tallas/Colores) -->
+        <div>
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-sm font-bold text-slate-900">Variantes y Stock</h3>
+            <button type="button" (click)="addVariant()" class="text-sm font-bold text-slate-900 hover:underline">+ Añadir Variante</button>
+          </div>
+          
+          <div formArrayName="variants" class="space-y-3">
+            <div *ngFor="let variant of variants.controls; let i=index" [formGroupName]="i" class="flex flex-col md:flex-row gap-3 items-start md:items-end bg-gray-50 p-4 rounded-xl border border-gray-100 relative">
+              
+              <!-- Nombre de la variante -->
+              <div class="flex-1 w-full">
+                <label class="block text-xs text-slate-500 mb-1 font-semibold">Nombre (Ej: Talla M)</label>
+                <input type="text" formControlName="name" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-slate-900 outline-none">
+              </div>
+
+              <!-- SKU (Código interno) -->
+              <div class="w-full md:w-32">
+                <label class="block text-xs text-slate-500 mb-1 font-semibold">SKU (Opcional)</label>
+                <input type="text" formControlName="sku" placeholder="Ej: ZAP-40" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-slate-900 outline-none">
+              </div>
+
+              <!-- Precio específico (Opcional) -->
+              <div class="w-full md:w-32">
+                <label class="block text-xs text-slate-500 mb-1 font-semibold">Precio (Opc.)</label>
+                <input type="number" formControlName="price" placeholder="S/ 0.00" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-slate-900 outline-none">
+              </div>
+
+              <!-- Stock -->
+              <div class="w-full md:w-24">
+                <label class="block text-xs text-slate-500 mb-1 font-semibold">Stock</label>
+                <input type="number" formControlName="stock" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-slate-900 outline-none">
+              </div>
+
+              <!-- Botón eliminar -->
+              <button type="button" (click)="removeVariant(i)" class="p-2.5 text-red-500 hover:text-white hover:bg-red-500 bg-red-50 rounded-lg transition-colors mt-1 md:mt-0" title="Eliminar variante">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="bg-gray-50 p-6 border-t border-gray-200 flex justify-end gap-4">
+        <button type="button" (click)="closeForm()" class="px-6 py-2.5 rounded-lg font-medium text-slate-600 hover:bg-gray-200 transition-colors">
+          Cancelar
+        </button>
+        <button type="submit" [disabled]="productForm.invalid || isLoading" class="bg-slate-900 text-white px-8 py-2.5 rounded-lg font-bold hover:bg-slate-800 transition-colors disabled:opacity-50">
+          {{ isLoading ? 'Guardando...' : 'Guardar Producto' }}
+        </button>
+      </div>
+    </form>
+  </div>
+
+</div>

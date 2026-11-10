@@ -1,0 +1,86 @@
+<div class="min-h-screen flex bg-gray-50">
+  
+  <!-- Lado Izquierdo: Imagen o Branding Corporativo -->
+  <div class="hidden lg:flex lg:w-1/2 bg-slate-900 justify-center items-center relative overflow-hidden">
+    <!-- Adorno de fondo sutil -->
+    <div class="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-900 opacity-90"></div>
+    
+    <div class="relative z-10 text-center px-12">
+      <h1 class="text-4xl font-bold text-white tracking-tight mb-4">ZentryShop</h1>
+      <p class="text-slate-400 text-lg">Plataforma de gestión y comercio electrónico.</p>
+    </div>
+  </div>
+
+  <!-- Lado Derecho: Formulario -->
+  <div class="w-full lg:w-1/2 flex items-center justify-center p-8">
+    <div class="w-full max-w-md">
+      
+      <!-- Título -->
+      <div class="text-center mb-10">
+        <h2 class="text-3xl font-extrabold text-slate-900">Iniciar Sesión</h2>
+        <p class="text-sm text-slate-500 mt-2">Ingresa tus credenciales para acceder al sistema.</p>
+      </div>
+
+      <!-- Formulario -->
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        
+        <!-- Input Email -->
+        <div>
+          <label for="email" class="block text-sm font-medium text-slate-700 mb-1">Correo Electrónico</label>
+          <input 
+            id="email" 
+            type="email" 
+            formControlName="email"
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 outline-none transition-all placeholder-gray-400 text-slate-900"
+            placeholder="ejemplo@correo.com"
+          />
+          <!-- Validación -->
+          <div *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched" class="text-red-500 text-xs mt-1">
+            Ingresa un correo válido.
+          </div>
+        </div>
+
+        <!-- Input Password -->
+        <div>
+          <div class="flex justify-between items-center mb-1">
+            <label for="password" class="block text-sm font-medium text-slate-700">Contraseña</label>
+            <a href="#" class="text-xs text-slate-600 hover:text-slate-900 hover:underline">¿Olvidaste tu contraseña?</a>
+          </div>
+          <input 
+            id="password" 
+            type="password" 
+            formControlName="password"
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 outline-none transition-all placeholder-gray-400 text-slate-900"
+            placeholder="••••••••"
+          />
+          <!-- Validación -->
+          <div *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" class="text-red-500 text-xs mt-1">
+            La contraseña es obligatoria.
+          </div>
+        </div>
+
+        <!-- Botón -->
+        <button 
+          type="submit" 
+          [disabled]="loginForm.invalid || isLoading"
+          class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-slate-900 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          <span *ngIf="!isLoading">Ingresar</span>
+          <span *ngIf="isLoading">Cargando...</span>
+        </button>
+        
+        <!-- Mensaje de error del backend -->
+        <div *ngIf="errorMessage" class="bg-red-50 text-red-600 p-3 rounded-lg text-sm text-center border border-red-100">
+          {{ errorMessage }}
+        </div>
+
+      </form>
+
+      <p class="mt-8 text-center text-sm text-slate-500">
+        ¿No tienes una cuenta? 
+        <a href="#" class="font-medium text-slate-900 hover:underline">Contacta a soporte</a>
+      </p>
+
+    </div>
+  </div>
+</div>
