@@ -66,18 +66,3 @@ export const routes: Routes = [
     redirectTo: 'tienda'
   }
 ];
-
-export const serverRoutes: ServerRoute[] = [
-  {
-    path: 'producto/:slug',
-    renderMode: RenderMode.Server // <-- Renderiza en el servidor, no en build
-  },
-  {
-    path: 'categoria/:slug',
-    renderMode: RenderMode.Server // <-- Renderiza en el servidor, no en build
-  },
-  {
-    path: '**',
-    renderMode: RenderMode.Prerender // El resto (home, etc.) puede ser estático
-  }
-];
