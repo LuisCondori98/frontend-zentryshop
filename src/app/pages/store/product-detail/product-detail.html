@@ -1,53 +1,62 @@
-<div class="bg-white min-h-screen py-10" *ngIf="product && !isLoading">
+<div class="bg-white min-h-screen py-6 sm:py-10" *ngIf="product && !isLoading">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     
     <!-- Breadcrumb (Migas de pan) -->
-    <nav class="flex text-sm text-slate-500 mb-8">
+    <nav class="flex text-sm text-slate-500 mb-6 sm:mb-8 overflow-x-auto whitespace-nowrap">
       <a routerLink="/tienda" class="hover:text-slate-900 transition-colors">Inicio</a>
       <span class="mx-2">/</span>
       <a routerLink="/productos" class="hover:text-slate-900 transition-colors">Catálogo</a>
       <span class="mx-2">/</span>
-      <span class="text-slate-900 font-medium">{{ product.name }}</span>
+      <span class="text-slate-900 font-medium truncate">{{ product.name }}</span>
     </nav>
 
     <div class="lg:grid lg:grid-cols-2 lg:gap-x-12 xl:gap-x-16">
       
-      <!-- COLUMNA IZQUIERDA: Imágenes -->
-      <div class="lg:max-w-lg lg:self-end">
-        <div class="aspect-w-1 aspect-h-1 rounded-2xl overflow-hidden bg-gray-100 mb-4 shadow-sm border border-gray-100">
-          <img [src]="selectedImage || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=800&auto=format&fit=crop'" 
-               [alt]="product.name" 
-               class="w-full h-[500px] object-cover object-center">
-        </div>
+      <!-- ========================================== -->
+      <!-- COLUMNA IZQUIERDA: Imágenes                -->
+      <!-- ========================================== -->
+      <div class="lg:max-w-lg lg:self-end flex flex-col-reverse lg:flex-col">
         
-        <!-- Miniaturas -->
-        <div class="grid grid-cols-4 gap-4" *ngIf="product.images?.length > 0">
+        <!-- Miniaturas (En móvil se ponen abajo y se deslizan, en PC a la izquierda/arriba) -->
+        <div class="mt-4 lg:mt-0 lg:mb-4 flex overflow-x-auto gap-3 scrollbar-hide snap-x" *ngIf="product.images?.length > 0">
           <button *ngFor="let img of product.images" 
                   (click)="selectedImage = img.url"
-                  class="relative rounded-lg overflow-hidden bg-gray-100 h-24 border-2 transition-all"
+                  class="relative rounded-xl overflow-hidden bg-white min-w-[80px] h-20 w-20 lg:w-24 lg:h-24 border-2 transition-all snap-start flex-shrink-0 p-1"
                   [class.border-slate-900]="selectedImage === img.url"
                   [class.border-transparent]="selectedImage !== img.url">
-            <img [src]="img.url" class="w-full h-full object-cover">
+            <img [src]="img.url" class="w-full h-full object-contain">
           </button>
+        </div>
+
+        <!-- Imagen Principal -->
+        <div class="w-full rounded-2xl overflow-hidden bg-white border border-gray-100 flex items-center justify-center p-4 mb-4 lg:mb-0 aspect-square lg:aspect-auto lg:h-[500px]">
+          <img [src]="selectedImage || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=800&auto=format&fit=crop'" 
+               [alt]="product.name" 
+               class="w-full h-full object-contain object-center">
         </div>
       </div>
 
-      <!-- COLUMNA DERECHA: Detalles y Compra -->
-      <div class="mt-10 px-4 sm:px-0 lg:mt-0">
-        <p class="text-sm font-semibold text-slate-500 uppercase tracking-widest mb-2">{{ product.category?.name || 'General' }}</p>
-        <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">{{ product.name }}</h1>
+      <!-- ========================================== -->
+      <!-- COLUMNA DERECHA: Detalles y Compra         -->
+      <!-- ========================================== -->
+      <div class="mt-8 lg:mt-0 px-0 sm:px-0">
         
-        <!-- Precio -->
+        <!-- Categoría y Título -->
+        <p class="text-xs sm:text-sm font-bold text-slate-400 uppercase tracking-widest mb-2">{{ product.category?.name || 'General' }}</p>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">{{ product.name }}</h1>
+        
+        <!-- Precio y SKU -->
         <div class="mt-4 flex items-center gap-4">
-          <p class="text-3xl font-black text-slate-900">S/ {{ product.price }}</p>
-          <span class="text-sm text-slate-400 bg-gray-100 px-2 py-1 rounded">SKU: {{ product.sku || 'N/A' }}</span>
+          <p class="text-3xl sm:text-4xl font-black text-slate-900">S/ {{ product.price }}</p>
+          <span class="text-xs text-slate-400 bg-gray-100 px-2 py-1 rounded">SKU: {{ product.sku || 'N/A' }}</span>
         </div>
 
+        <!-- Descripción -->
         <div class="mt-6">
-          <p class="text-base text-slate-600 leading-relaxed">{{ product.description }}</p>
+          <p class="text-sm sm:text-base text-slate-600 leading-relaxed">{{ product.description }}</p>
         </div>
 
-        <div class="mt-8 border-t border-gray-200 pt-8">
+        <div class="mt-8 border-t border-gray-100 pt-6">
           
           <!-- SELECTOR DE VARIANTES -->
           <div class="mb-6" *ngIf="product.variants?.length > 0">
@@ -56,7 +65,7 @@
               <span class="text-xs text-slate-500" *ngIf="selectedVariant">Stock: {{ selectedVariant.stock }} unidades</span>
             </div>
             
-            <div class="grid grid-cols-3 gap-3">
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
               <button *ngFor="let variant of product.variants" 
                       (click)="selectVariant(variant)"
                       [disabled]="variant.stock === 0"
@@ -72,47 +81,54 @@
             <p *ngIf="errorMessage" class="text-red-500 text-sm mt-2">{{ errorMessage }}</p>
           </div>
 
-          <!-- 👇 NUEVO SELECTOR DE CANTIDAD 👇 -->
-          <div class="mb-6">
-            <h3 class="text-sm font-bold text-slate-900 mb-3">Cantidad</h3>
-            <div class="flex items-center w-32 bg-gray-50 border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-              <button (click)="decreaseQuantity()" 
-                      class="px-4 py-3 text-slate-600 hover:bg-gray-200 transition-colors focus:outline-none disabled:opacity-50"
-                      [disabled]="quantity <= 1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
-              </button>
-              
-              <input type="number" [value]="quantity" readonly 
-                     class="w-full text-center bg-transparent border-none focus:ring-0 text-slate-900 font-bold appearance-none">
-              
-              <button (click)="increaseQuantity()" 
-                      class="px-4 py-3 text-slate-600 hover:bg-gray-200 transition-colors focus:outline-none disabled:opacity-50"
-                      [disabled]="selectedVariant && quantity >= selectedVariant.stock">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          <!-- SELECTOR DE CANTIDAD Y BOTÓN -->
+          <div class="flex flex-col sm:flex-row gap-4 items-end">
+            
+            <!-- Cantidad -->
+            <div class="w-full sm:w-32">
+              <h3 class="text-sm font-bold text-slate-900 mb-3">Cantidad</h3>
+              <div class="flex items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden shadow-sm h-[52px]">
+                <button (click)="decreaseQuantity()" 
+                        class="px-4 h-full text-slate-600 hover:bg-gray-200 transition-colors disabled:opacity-50"
+                        [disabled]="quantity <= 1">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
+                </button>
+                
+                <input type="number" [value]="quantity" readonly 
+                       class="w-full text-center bg-transparent border-none focus:ring-0 text-slate-900 font-bold appearance-none">
+                
+                <button (click)="increaseQuantity()" 
+                        class="px-4 h-full text-slate-600 hover:bg-gray-200 transition-colors disabled:opacity-50"
+                        [disabled]="selectedVariant && quantity >= selectedVariant.stock">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Botón Añadir al carrito -->
+            <div class="w-full flex-1">
+              <h3 class="text-sm font-bold text-slate-900 mb-3 hidden sm:block">&nbsp;</h3>
+              <button (click)="addToCart()" 
+                      [disabled]="(product.variants?.length > 0 && !selectedVariant) || isAddingToCart"
+                      class="w-full h-[52px] bg-slate-900 text-white rounded-xl font-bold text-base hover:bg-slate-800 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3">
+                
+                <svg *ngIf="!isAddingToCart" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                <svg *ngIf="isAddingToCart" class="animate-spin w-5 h-5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                
+                {{ isAddingToCart ? 'Agregando...' : 'Añadir al Carrito' }}
               </button>
             </div>
           </div>
-
-          <!-- BOTÓN AGREGAR AL CARRITO -->
-          <button (click)="addToCart()" 
-                  [disabled]="(product.variants?.length > 0 && !selectedVariant) || isAddingToCart"
-                  class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold text-lg hover:bg-slate-800 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3">
-            
-            <svg *ngIf="!isAddingToCart" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
-            <svg *ngIf="isAddingToCart" class="animate-spin w-6 h-6 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-            
-            {{ isAddingToCart ? 'Agregando...' : 'Añadir al Carrito' }}
-          </button>
         </div>
 
         <!-- BENEFICIOS -->
-        <div class="mt-8 space-y-4">
+        <div class="mt-8 space-y-3 bg-gray-50 p-4 rounded-xl border border-gray-100">
           <div class="flex items-center gap-3 text-sm text-slate-600">
-            <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            <svg class="w-5 h-5 text-green-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
             Envío seguro a todo el Perú (24h - 48h)
           </div>
           <div class="flex items-center gap-3 text-sm text-slate-600">
-            <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+            <svg class="w-5 h-5 text-green-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
             Garantía de devolución de 7 días
           </div>
         </div>
@@ -122,7 +138,7 @@
   </div>
 </div>
 
-<!-- LOADING INICIAL -->
+<!-- LOADING -->
 <div *ngIf="isLoading" class="min-h-screen flex items-center justify-center">
   <div class="animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-slate-900"></div>
 </div>
