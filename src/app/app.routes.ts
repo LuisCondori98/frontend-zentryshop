@@ -23,6 +23,7 @@ import { guestGuard } from './guards/guest-guard';
 import { roleGuard } from './guards/role-guard';
 import { CartComponent } from './pages/store/cart/cart';
 import { AdminCategoriesComponent } from './pages/admin/categories/categories';
+import { RenderMode, ServerRoute } from '@angular/ssr';
 
 export const routes: Routes = [
   {
@@ -63,5 +64,20 @@ export const routes: Routes = [
   { 
     path: '**',
     redirectTo: 'tienda'
+  }
+];
+
+export const serverRoutes: ServerRoute[] = [
+  {
+    path: 'producto/:slug',
+    renderMode: RenderMode.Server // <-- Renderiza en el servidor, no en build
+  },
+  {
+    path: 'categoria/:slug',
+    renderMode: RenderMode.Server // <-- Renderiza en el servidor, no en build
+  },
+  {
+    path: '**',
+    renderMode: RenderMode.Prerender // El resto (home, etc.) puede ser estático
   }
 ];
