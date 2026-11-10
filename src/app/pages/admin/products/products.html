@@ -133,17 +133,28 @@
           </label>
         </div>
 
-        <!-- Sección 3: Imagen -->
+        <!-- Sección 3: Imágenes -->
         <div>
-          <h3 class="text-sm font-bold text-slate-900 mb-2">Imagen Principal</h3>
+          <h3 class="text-sm font-bold text-slate-900 mb-2">Imágenes del Producto</h3>
+          
+          <!-- Galería de previsualización -->
+          <div class="grid grid-cols-3 sm:grid-cols-4 gap-4 mb-4" *ngIf="previewUrls.length > 0">
+            <div *ngFor="let url of previewUrls; let i = index" class="relative group aspect-square rounded-xl overflow-hidden border border-gray-200">
+              <img [src]="url" class="w-full h-full object-cover">
+              <button type="button" (click)="removeImage(i)" class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Zona para subir archivos -->
           <div class="flex items-center justify-center w-full">
-            <label for="dropzone-file" class="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 relative overflow-hidden">
-              <div class="flex flex-col items-center justify-center pt-5 pb-6" *ngIf="!previewUrl">
-                <svg class="w-8 h-8 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
-                <p class="text-sm text-slate-500"><span class="font-semibold">Subir imagen</span></p>
+            <label for="dropzone-file" class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
+              <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                <svg class="w-8 h-8 mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                <p class="text-sm text-slate-500"><span class="font-semibold">Haz clic para subir</span> (Puedes elegir varias)</p>
               </div>
-              <img *ngIf="previewUrl" [src]="previewUrl" class="absolute inset-0 w-full h-full object-contain p-4 bg-white">
-              <input id="dropzone-file" type="file" class="hidden" (change)="onFileSelected($event)" accept="image/*" />
+              <input id="dropzone-file" type="file" class="hidden" (change)="onFileSelected($event)" accept="image/*" multiple />
             </label>
           </div>
         </div>

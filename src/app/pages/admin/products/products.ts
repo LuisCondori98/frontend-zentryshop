@@ -22,7 +22,10 @@ export class AdminProductsComponent implements OnInit {
   
   isLoading = false;
   isLoadingList = true;
-  previewUrl: string | null = null;
+  
+  // 👇 Cambiamos a un arreglo para múltiples imágenes
+  previewUrls: string[] = [];
+  isUploadingImage = false;
 
   private apiUrl = environment.apiUrl;
 
@@ -41,7 +44,7 @@ export class AdminProductsComponent implements OnInit {
       isFeatured: [false],
       isOnSale: [false],
       variants: this.fb.array([]),
-      images: [[]]
+      images: [[]] // Array de imágenes
     });
   }
 
@@ -74,17 +77,19 @@ export class AdminProductsComponent implements OnInit {
     this.showForm = true;
     this.isEditing = false;
     this.currentProductId = null;
-    this.productForm.reset({ isFeatured: false, isOnSale: false });
+    this.productForm.reset({ isFeatured: false, isOnSale: false, images: [] });
     this.variants.clear();
     this.addVariant();
-    this.previewUrl = null;
+    this.previewUrls = []; // Limpiamos la previsualización
   }
 
-    editProduct(prod: any) {
+  editProduct(prod: any) {
     this.showForm = true;
     this.isEditing = true;
     this.currentProductId = prod.id;
-    this.previewUrl = prod.images[0]?.url || null;
+    
+    // Llenamos las previsualizaciones con las imágenes que ya tiene el producto
+    this.previewUrls = prod.images ? prod.images.map((img: any) => img.url) : [];
 
     this.productForm.patchValue({
       name: prod.name,
@@ -101,7 +106,7 @@ export class AdminProductsComponent implements OnInit {
     if (prod.variants && prod.variants.length > 0) {
       prod.variants.forEach((v: any) => {
         this.variants.push(this.fb.group({
-          id: [v.id], // <-- Importante para que el backend sepa que es una variante existente
+          id: [v.id],
           name: [v.name, Validators.required],
           sku: [v.sku || ''],
           price: [v.price || null],
@@ -125,22 +130,62 @@ export class AdminProductsComponent implements OnInit {
     }
   }
 
-  // --- Lógica de Imagen ---
+  // --- Lógica de MÚLTIPLES Imágenes ---
   async onFileSelected(event: any) {
-    const file: File = event.target.files[0];
-    if (!file) return;
+    const files: FileList = event.target.files;
+    if (!files || files.length === 0) return;
 
-    this.previewUrl = URL.createObjectURL(file);
+    this.isUploadingImage = true;
 
     try {
-      const publicUrl = await this.supabaseService.uploadImage(file);
+      const uploadPromises = [];
+      const urlsToPreview: string[] = [];
+
+      // Preparamos la subida y la previsualización rápida de todos los archivos
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        urlsToPreview.push(URL.createObjectURL(file));
+        uploadPromises.push(this.supabaseService.uploadImage(file));
+      }
+
+      // Agregamos las nuevas previsualizaciones a las que ya teníamos
+      this.previewUrls = [...this.previewUrls, ...urlsToPreview];
+      this.cdr.detectChanges();
+
+      // Subimos todas a Supabase en paralelo
+      const uploadedUrls = await Promise.all(uploadPromises);
+
+      // Preparamos el array de imágenes para el formulario
+      const currentImages = this.productForm.value.images || [];
+      const newImages = uploadedUrls.map((url, index) => ({
+        url: url,
+        isMain: currentImages.length === 0 && index === 0 // La primera será la principal
+      }));
+
+      // Actualizamos el formulario con todas las imágenes
       this.productForm.patchValue({
-        images: [{ url: publicUrl, isMain: true }]
+        images: [...currentImages, ...newImages]
       });
+
     } catch (error) {
-      alert('Error subiendo imagen');
-      this.previewUrl = null;
+      alert('Error subiendo una o más imágenes a Supabase');
+      console.error(error);
+      this.previewUrls = this.productForm.value.images.map((img: any) => img.url); // Revertimos
+    } finally {
+      this.isUploadingImage = false;
+      this.cdr.detectChanges();
     }
+  }
+
+  // Función para eliminar una imagen de la galería
+  removeImage(index: number) {
+    // Quitamos la imagen visual
+    this.previewUrls.splice(index, 1);
+    
+    // Quitamos la imagen del formulario
+    const currentImages = this.productForm.value.images;
+    currentImages.splice(index, 1);
+    this.productForm.patchValue({ images: currentImages });
   }
 
   // --- Lógica de Variantes ---
@@ -150,7 +195,7 @@ export class AdminProductsComponent implements OnInit {
 
   addVariant() {
     const variantForm = this.fb.group({
-      id: [null], // <-- Guardamos el ID por si estamos editando
+      id: [null],
       name: ['', Validators.required],
       sku: [''], 
       price: [null],
@@ -165,10 +210,9 @@ export class AdminProductsComponent implements OnInit {
 
   // --- Guardar (Crear o Editar) ---
   onSubmit() {
-    if (this.productForm.invalid) return;
+    if (this.productForm.invalid || this.isUploadingImage) return;
     this.isLoading = true;
 
-    // Forzamos a que el precio sea un número real
     const payload = {
       ...this.productForm.value,
       price: Number(this.productForm.value.price),
@@ -179,10 +223,10 @@ export class AdminProductsComponent implements OnInit {
         altText: img.altText
       })),
       variants: this.productForm.value.variants.map((v: any) => ({
-        id: v.id || undefined, // Si es nueva, no enviamos ID
+        id: v.id || undefined,
         name: v.name,
-        sku: v.sku || null,    // Si está vacío, enviamos null
-        price: v.price ? Number(v.price) : null, // Si está vacío, enviamos null
+        sku: v.sku || null,
+        price: v.price ? Number(v.price) : null,
         stock: Number(v.stock)
       }))
     };
