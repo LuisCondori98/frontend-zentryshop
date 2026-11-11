@@ -24,6 +24,7 @@ import { roleGuard } from './guards/role-guard';
 import { CartComponent } from './pages/store/cart/cart';
 import { AdminCategoriesComponent } from './pages/admin/categories/categories';
 import { RenderMode, ServerRoute } from '@angular/ssr';
+import { MyAddresses } from './pages/store/my-addresses/my-addresses';
 
 export const routes: Routes = [
   {
@@ -46,6 +47,7 @@ export const routes: Routes = [
       { path: 'categoria/:slug', component: Catalog },
       { path: 'product/:slug', component: ProductDetail },
       { path: 'carrito', component: CartComponent },
+      { path: 'mis-direcciones', component: MyAddresses },
     ]
   },
   {

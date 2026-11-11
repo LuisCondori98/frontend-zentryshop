@@ -24,7 +24,7 @@
         
         <div class="flex items-center space-x-4 pl-4 border-l border-gray-200">
           
-          <!-- 👇 LÓGICA SI NO HAY USUARIO 👇 -->
+          <!-- SI NO HAY USUARIO -->
           <ng-container *ngIf="!authService.currentUser()">
             <a routerLink="/login" class="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Ingresar</a>
             <a routerLink="/register" class="text-sm font-medium text-white bg-slate-900 hover:bg-slate-800 px-4 py-2 rounded-lg transition-colors shadow-sm">
@@ -32,39 +32,53 @@
             </a>
           </ng-container>
 
-          <!-- 👇 LÓGICA SI HAY USUARIO LOGUEADO 👇 -->
+          <!-- SI HAY USUARIO LOGUEADO -->
           <div *ngIf="authService.currentUser()" class="flex items-center gap-5">
             
-            <!-- Botón extra si es Admin -->
+            <!-- Panel Admin (Solo si es ADMIN) -->
             <a *ngIf="authService.currentUser().role === 'ADMIN'" routerLink="/admin" class="text-sm font-bold text-slate-900 hover:text-slate-600 transition-colors">
               Panel Admin
             </a>
             
-            <!-- Carrito de Compras (Solo para clientes) -->
+            <!-- Carrito de Compras (Solo si es CUSTOMER) -->
             <a *ngIf="authService.currentUser().role === 'CUSTOMER'" routerLink="/carrito" class="relative p-2 text-slate-600 hover:text-slate-900 transition-colors">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
               </svg>
-              <!-- El globito rojo con la cantidad -->
               <span *ngIf="cartService.cartCount() > 0" class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-[10px] font-bold leading-none text-white transform translate-x-1/4 -translate-y-1/4 bg-red-600 rounded-full shadow-sm">
                 {{ cartService.cartCount() }}
               </span>
             </a>
 
-            <!-- Círculo con la inicial y nombre -->
-            <div class="flex items-center gap-3 border border-gray-200 rounded-full px-3 py-1.5 bg-gray-50 cursor-default">
-              <div class="w-7 h-7 bg-slate-900 text-white rounded-full flex items-center justify-center font-bold text-xs">
-                {{ authService.currentUser().firstName?.charAt(0) || authService.currentUser().email.charAt(0) | uppercase }}
-              </div>
-              <span class="text-sm font-medium text-slate-700">
-                {{ authService.currentUser().firstName || 'Mi Cuenta' }}
-              </span>
-            </div>
+            <!-- 👇 MENÚ DESPLEGABLE DE USUARIO 👇 -->
+            <details class="relative group">
+              <summary class="flex items-center gap-3 border border-gray-200 rounded-full px-3 py-1.5 bg-gray-50 cursor-pointer list-none select-none hover:bg-gray-100 transition-colors">
+                <div class="w-7 h-7 bg-slate-900 text-white rounded-full flex items-center justify-center font-bold text-xs">
+                  {{ authService.currentUser().firstName?.charAt(0) || authService.currentUser().email.charAt(0) | uppercase }}
+                </div>
+                <span class="text-sm font-medium text-slate-700">
+                  {{ authService.currentUser().firstName || 'Mi Cuenta' }}
+                </span>
+                <svg class="w-4 h-4 text-slate-500 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+              </summary>
 
-            <!-- Botón Cerrar Sesión -->
-            <button (click)="authService.logout()" class="text-sm font-medium text-red-600 hover:text-red-700 transition-colors">
-              Salir
-            </button>
+              <!-- Opciones del menú -->
+              <div class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
+                
+                <!-- Mis Direcciones (Solo para CUSTOMER) -->
+                <a *ngIf="authService.currentUser().role === 'CUSTOMER'" 
+                   routerLink="/mis-direcciones" 
+                   class="block px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors">
+                  Mis Direcciones
+                </a>
+                
+                <!-- Cerrar Sesión -->
+                <button (click)="authService.logout()" class="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                  Cerrar Sesión
+                </button>
+              </div>
+            </details>
+
           </div>
           
         </div>
@@ -73,7 +87,7 @@
       <!-- Botón Menú Móvil (Hamburguesa) -->
       <div class="flex items-center md:hidden">
         
-        <!-- Ícono del carrito en móvil (Visible antes de abrir el menú) -->
+        <!-- Carrito Móvil -->
         <a *ngIf="authService.currentUser() && authService.currentUser().role === 'CUSTOMER'" routerLink="/carrito" class="relative p-2 mr-1 text-slate-600 hover:text-slate-900 transition-colors">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
@@ -103,13 +117,13 @@
       
       <div class="pt-4 border-t border-gray-100 mt-2">
         
-        <!-- Lógica móvil si NO hay usuario -->
+        <!-- Móvil: No hay usuario -->
         <ng-container *ngIf="!authService.currentUser()">
           <a routerLink="/login" class="block px-3 py-2 text-base font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-md">Ingresar</a>
           <a routerLink="/register" class="block mt-2 px-3 py-2 text-center text-base font-medium text-white bg-slate-900 hover:bg-slate-800 rounded-md">Crear cuenta</a>
         </ng-container>
 
-        <!-- Lógica móvil si SÍ hay usuario -->
+        <!-- Móvil: SÍ hay usuario -->
         <div *ngIf="authService.currentUser()">
            <div class="px-3 py-2 flex items-center gap-3 bg-gray-50 rounded-md mb-2">
               <div class="w-8 h-8 bg-slate-900 text-white rounded-full flex items-center justify-center font-bold text-sm">
@@ -121,7 +135,12 @@
            </div>
            
            <a *ngIf="authService.currentUser().role === 'ADMIN'" routerLink="/admin" class="block px-3 py-2 text-base font-medium text-slate-900 hover:bg-slate-50 rounded-md">Panel Admin</a>
-           <a *ngIf="authService.currentUser().role === 'CUSTOMER'" routerLink="/carrito" class="block px-3 py-2 text-base font-medium text-slate-900 hover:bg-slate-50 rounded-md">Mi Carrito ({{ cartService.cartCount() }})</a>
+           
+           <!-- Opciones para CLIENTE -->
+           <ng-container *ngIf="authService.currentUser().role === 'CUSTOMER'">
+             <a routerLink="/carrito" class="block px-3 py-2 text-base font-medium text-slate-900 hover:bg-slate-50 rounded-md">Mi Carrito ({{ cartService.cartCount() }})</a>
+             <a routerLink="/mis-direcciones" (click)="isMobileMenuOpen = false" class="block px-3 py-2 text-base font-medium text-slate-900 hover:bg-slate-50 rounded-md">Mis Direcciones</a>
+           </ng-container>
            
            <button (click)="authService.logout()" class="w-full text-left block px-3 py-2 text-base font-medium text-red-600 hover:bg-red-50 rounded-md mt-1">Cerrar Sesión</button>
         </div>
