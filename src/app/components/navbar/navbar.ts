@@ -11,10 +11,10 @@ import { CartService } from '../../services/cart';
   templateUrl: './navbar.html',
   styleUrls: ['./navbar.css']
 })
-export class NavbarComponent implements OnInit {
+export class Navbar implements OnInit {
   isHidden = false;
   isMobileMenuOpen = false;
-  isUserMenuOpen = false; // <-- NUEVA VARIABLE para el menú de usuario
+  isUserMenuOpen = false;
   lastScrollY = 0;
 
   constructor(
