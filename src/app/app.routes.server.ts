@@ -17,7 +17,7 @@ export const serverRoutes: ServerRoute[] = [
 
   // 2. Rutas dinámicas: Se renderizan en el servidor
   {
-    path: 'producto/:slug',
+    path: 'product/:slug',
     renderMode: RenderMode.Server
   },
   {
