@@ -50,34 +50,43 @@
               </span>
             </a>
 
-            <!-- 👇 MENÚ DESPLEGABLE DE USUARIO 👇 -->
-            <details class="relative group">
-              <summary class="flex items-center gap-3 border border-gray-200 rounded-full px-3 py-1.5 bg-gray-50 cursor-pointer list-none select-none hover:bg-gray-100 transition-colors">
+            <!-- 👇 MENÚ DESPLEGABLE DE USUARIO (Con Angular puro) 👇 -->
+            <div class="relative">
+              <!-- Botón que abre el menú -->
+              <button (click)="isUserMenuOpen = !isUserMenuOpen" 
+                      class="flex items-center gap-3 border border-gray-200 rounded-full px-3 py-1.5 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors focus:outline-none">
                 <div class="w-7 h-7 bg-slate-900 text-white rounded-full flex items-center justify-center font-bold text-xs">
                   {{ authService.currentUser().firstName?.charAt(0) || authService.currentUser().email.charAt(0) | uppercase }}
                 </div>
-                <span class="text-sm font-medium text-slate-700">
+                <span class="text-sm font-medium text-slate-700 hidden sm:block">
                   {{ authService.currentUser().firstName || 'Mi Cuenta' }}
                 </span>
-                <svg class="w-4 h-4 text-slate-500 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-              </summary>
+                <svg class="w-4 h-4 text-slate-500 transition-transform duration-200" 
+                     [ngClass]="{'rotate-180': isUserMenuOpen}" 
+                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </button>
 
-              <!-- Opciones del menú -->
-              <div class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
+              <!-- Opciones del menú (Se muestra si isUserMenuOpen es true) -->
+              <div *ngIf="isUserMenuOpen" 
+                   class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
                 
                 <!-- Mis Direcciones (Solo para CUSTOMER) -->
                 <a *ngIf="authService.currentUser().role === 'CUSTOMER'" 
                    routerLink="/mis-direcciones" 
+                   (click)="isUserMenuOpen = false"
                    class="block px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors">
                   Mis Direcciones
                 </a>
                 
                 <!-- Cerrar Sesión -->
-                <button (click)="authService.logout()" class="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                <button (click)="authService.logout(); isUserMenuOpen = false" 
+                        class="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
                   Cerrar Sesión
                 </button>
               </div>
-            </details>
+            </div>
 
           </div>
           

@@ -1,6 +1,6 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { Auth } from '../../services/auth';
 import { CartService } from '../../services/cart';
 
@@ -11,9 +11,10 @@ import { CartService } from '../../services/cart';
   templateUrl: './navbar.html',
   styleUrls: ['./navbar.css']
 })
-export class Navbar implements OnInit {
-  isHidden = false; // Controla si se oculta o no
+export class NavbarComponent implements OnInit {
+  isHidden = false;
   isMobileMenuOpen = false;
+  isUserMenuOpen = false; // <-- NUEVA VARIABLE para el menú de usuario
   lastScrollY = 0;
 
   constructor(
@@ -27,23 +28,24 @@ export class Navbar implements OnInit {
     }
   }
 
-  // Escucha el evento de scroll en la ventana
   @HostListener('window:scroll', [])
   onWindowScroll() {
     const currentScrollY = window.scrollY;
-
-    // Si bajamos más de 50px y vamos hacia abajo, se oculta
     if (currentScrollY > this.lastScrollY && currentScrollY > 50) {
       this.isHidden = true;
     } else {
-      // Si subimos, se muestra
       this.isHidden = false;
     }
-
     this.lastScrollY = currentScrollY;
   }
 
   toggleMobileMenu() {
     this.isMobileMenuOpen = !this.isMobileMenuOpen;
+    this.isUserMenuOpen = false; // Cerramos el menú de usuario si abrimos el móvil
+  }
+
+  // Función para abrir/cerrar el menú de usuario
+  toggleUserMenu() {
+    this.isUserMenuOpen = !this.isUserMenuOpen;
   }
 }
