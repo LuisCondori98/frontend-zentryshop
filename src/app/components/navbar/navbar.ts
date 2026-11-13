@@ -41,10 +41,9 @@ export class Navbar implements OnInit {
 
   toggleMobileMenu() {
     this.isMobileMenuOpen = !this.isMobileMenuOpen;
-    this.isUserMenuOpen = false; // Cerramos el menú de usuario si abrimos el móvil
+    this.isUserMenuOpen = false;
   }
 
-  // Función para abrir/cerrar el menú de usuario
   toggleUserMenu() {
     this.isUserMenuOpen = !this.isUserMenuOpen;
   }
