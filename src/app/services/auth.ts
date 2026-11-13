@@ -73,7 +73,9 @@ export class Auth {
   }
 
   getToken() {
-
-    return localStorage.getItem('access_token');
+    if (isPlatformBrowser(this.platformId)) {
+      return localStorage.getItem('access_token');
+    }
+    return null;
   }
 }
