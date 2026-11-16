@@ -9,7 +9,7 @@ import { forkJoin } from 'rxjs';
 @Component({
   selector: 'app-catalog',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule], // <-- Agrega FormsModule
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './catalog.html',
   styleUrls: ['./catalog.css']
 })
@@ -41,12 +41,17 @@ export class Catalog implements OnInit {
   }
 
   loadData() {
+
     this.isLoading = true;
+
     forkJoin({
+
       categories: this.http.get<any[]>(`${this.apiUrl}/category`),
       products: this.http.get<any[]>(`${this.apiUrl}/product`)
     }).subscribe({
+
       next: (res) => {
+
         this.categories = res.categories;
         this.products = res.products;
         this.applyFilter(); 
@@ -54,13 +59,13 @@ export class Catalog implements OnInit {
         this.cdr.detectChanges(); 
       },
       error: (err) => {
+
         this.isLoading = false;
         this.cdr.detectChanges();
       }
     });
   }
-
-  // 👇 NUEVA LÓGICA DE FILTRADO (Categoría + Buscador) 👇
+  
   applyFilter() {
     let temp = this.products;
 
@@ -87,12 +92,14 @@ export class Catalog implements OnInit {
   }
 
   filterByCategory(categoryId: number | null) {
+
     this.selectedCategory = categoryId;
     
-    // Actualizamos la URL
     if (categoryId) {
+      
       this.router.navigate(['/productos'], { queryParams: { categoria: categoryId } });
     } else {
+
       this.router.navigate(['/productos']);
     }
     

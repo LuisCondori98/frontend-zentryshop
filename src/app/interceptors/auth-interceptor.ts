@@ -1,24 +1,40 @@
-import { HttpInterceptorFn } from '@angular/common/http';
+import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { catchError, throwError } from 'rxjs';
+import { Auth } from '../services/auth';
+import { Router } from '@angular/router';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
+
   const platformId = inject(PLATFORM_ID);
+  const authService = inject(Auth);
+  const router = inject(Router);
 
-  // Nos aseguramos de estar en el navegador (por el SSR)
+  let clonedReq = req;
+
   if (isPlatformBrowser(platformId)) {
-    const token = localStorage.getItem('access_token');
-
-    // Si hay token, lo agregamos a la cabecera
+    const token = authService.getToken();
     if (token) {
-      const clonedReq = req.clone({
+      clonedReq = req.clone({
         setHeaders: {
           Authorization: `Bearer ${token}`
         }
       });
-      return next(clonedReq); // Enviamos la petición con el token
     }
   }
 
-  return next(req); // Si no hay token, enviamos normal
+  return next(clonedReq).pipe(
+    catchError((error: HttpErrorResponse) => {
+
+      if (error.status === 401) {
+
+        console.warn('Sesión expirada. Cerrando sesión...');
+
+        authService.logout();
+      }
+      
+      return throwError(() => error);
+    })
+  );
 };
