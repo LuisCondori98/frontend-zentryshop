@@ -46,9 +46,25 @@
         <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">{{ product.name }}</h1>
         
         <!-- Precio y SKU -->
-        <div class="mt-4 flex items-center gap-4">
-          <p class="text-3xl sm:text-4xl font-black text-slate-900">S/ {{ product.price }}</p>
-          <span class="text-xs text-slate-400 bg-gray-100 px-2 py-1 rounded">SKU: {{ product.sku || 'N/A' }}</span>
+        <div class="mt-4 flex flex-col sm:flex-row sm:items-center gap-4">
+  
+          <!-- Lógica del Precio -->
+          <div class="flex items-baseline gap-2">
+            <!-- Si hay variante con precio propio, lo mostramos -->
+            <p class="text-3xl sm:text-4xl font-black text-slate-900" *ngIf="selectedVariant && selectedVariant.price; else basePrice">
+              S/ {{ selectedVariant.price }}
+            </p>
+
+            <!-- Si no hay variante o la variante no tiene precio, mostramos el del producto -->
+            <ng-template #basePrice>
+              <p class="text-3xl sm:text-4xl font-black text-slate-900">S/ {{ product.price }}</p>
+            </ng-template>
+          </div>
+
+          <!-- SKU -->
+          <span class="text-xs text-slate-400 bg-gray-100 px-2 py-1 rounded self-start sm:self-center">
+            SKU: {{ selectedVariant?.sku || product.sku || 'N/A' }}
+          </span>
         </div>
 
         <!-- Descripción -->

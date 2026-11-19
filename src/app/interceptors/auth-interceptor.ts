@@ -31,7 +31,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
         console.warn('Sesión expirada. Cerrando sesión...');
 
-        authService.logout();
+        authService.logout(true);
       }
       
       return throwError(() => error);

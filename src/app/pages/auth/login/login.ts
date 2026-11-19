@@ -19,7 +19,7 @@ export class Login {
     private fb: FormBuilder,
     private authService: Auth,
     private router: Router,
-    private cdr: ChangeDetectorRef // <-- 2. Inyectar
+    private cdr: ChangeDetectorRef
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],

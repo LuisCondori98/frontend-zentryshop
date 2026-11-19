@@ -1,46 +1,105 @@
-<div class="min-h-screen bg-gray-50 py-12">
+<div class="bg-gray-50 min-h-screen py-12">
   <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-    <h1 class="text-3xl font-extrabold text-slate-900 mb-8">Tu Carrito</h1>
+    
+    <div class="mb-8 flex items-end justify-between">
+      <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Tu Carrito</h1>
+        <p class="text-slate-500 mt-1">Revisa tus productos antes de pagar.</p>
+      </div>
+      <a routerLink="/productos" class="text-sm font-medium text-slate-600 hover:text-slate-900 underline hidden sm:block">Seguir comprando</a>
+    </div>
 
     <!-- Carrito Vacío -->
-    <div *ngIf="cartService.cartItems().length === 0" class="text-center py-20 bg-white rounded-2xl shadow-sm">
-      <h2 class="text-xl font-bold text-slate-900 mb-2">Tu carrito está vacío</h2>
-      <p class="text-slate-500 mb-6">Parece que aún no has agregado nada.</p>
-      <a routerLink="/productos" class="bg-slate-900 text-white px-6 py-3 rounded-lg font-medium hover:bg-slate-800">Ir al Catálogo</a>
+    <div *ngIf="cartService.cartItems().length === 0" class="text-center py-24 bg-white rounded-3xl shadow-sm border border-gray-100">
+      <div class="w-20 h-20 mx-auto bg-gray-50 rounded-full flex items-center justify-center mb-6">
+        <svg class="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+        </svg>
+      </div>
+      <h2 class="text-2xl font-bold text-slate-900 mb-2">Tu carrito está vacío</h2>
+      <p class="text-slate-500 mb-8">Parece que aún no has agregado nada a tu carrito.</p>
+      <a routerLink="/productos" class="bg-slate-900 text-white px-8 py-3 rounded-xl font-bold hover:bg-slate-800 transition-colors shadow-md">
+        Explorar Catálogo
+      </a>
     </div>
 
     <!-- Carrito con Productos -->
     <div *ngIf="cartService.cartItems().length > 0" class="flex flex-col lg:flex-row gap-8">
       
+      <!-- Lista de Productos -->
       <div class="flex-1 space-y-4">
-        <div *ngFor="let item of cartService.cartItems()" class="bg-white p-4 rounded-2xl shadow-sm flex items-center gap-4 border border-gray-100">
-          <img [src]="item.variant.product.images[0]?.url || 'https://via.placeholder.com/150'" class="w-24 h-24 object-cover rounded-xl bg-gray-100">
+        <div *ngFor="let item of cartService.cartItems()" class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
           
-          <div class="flex-1">
-            <h3 class="font-bold text-slate-900">{{ item.variant.product.name }}</h3>
-            <p class="text-sm text-slate-500">Variante: {{ item.variant.name }}</p>
-            <p class="text-lg font-bold text-slate-900 mt-2">S/ {{ item.variant.price || item.variant.product.price }}</p>
+          <!-- Imagen del producto -->
+          <img [src]="item.variant.product.images[0]?.url || 'https://via.placeholder.com/150'" 
+               class="w-24 h-24 object-cover rounded-xl bg-gray-100 border border-gray-200 shrink-0">
+          
+          <!-- Detalles del producto -->
+          <div class="flex-1 w-full">
+            <div class="flex justify-between items-start">
+              <div>
+                <h3 class="font-bold text-slate-900 text-lg leading-tight">{{ item.variant.product.name }}</h3>
+                <p class="text-sm text-slate-500 mt-1">Variante: <span class="font-medium text-slate-700">{{ item.variant.name }}</span></p>
+              </div>
+              
+              <!-- Botón para eliminar -->
+              <button (click)="cartService.removeItem(item.id).subscribe()" 
+                      class="text-red-400 hover:text-red-600 transition-colors p-2 bg-red-50 hover:bg-red-100 rounded-lg shrink-0" 
+                      title="Eliminar del carrito">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+              </button>
+            </div>
+            
+            <div class="mt-4 flex items-center justify-between">
+              <span class="text-sm font-medium text-slate-600 bg-gray-100 px-3 py-1 rounded-lg">Cantidad: {{ item.quantity }}</span>
+              <div class="text-right">
+                <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider block mb-0.5">Subtotal</span>
+                <span class="text-xl font-black text-slate-900">S/ {{ ((item.variant.price || item.variant.product.price) * item.quantity).toFixed(2) }}</span>
+              </div>
+            </div>
           </div>
+        </div>
 
-          <div class="flex flex-col items-end gap-2">
-            <span class="text-sm font-medium text-slate-600 bg-gray-100 px-3 py-1 rounded-lg">Cant: {{ item.quantity }}</span>
-            <button (click)="removeItem(item.id)" class="text-red-500 hover:text-red-700 text-sm font-medium">Eliminar</button>
-          </div>
+        <!-- Botón para seguir comprando en móvil -->
+        <div class="sm:hidden pt-4">
+          <a routerLink="/productos" class="text-sm font-medium text-slate-600 hover:text-slate-900 underline">Seguir comprando</a>
         </div>
       </div>
 
+      <!-- Resumen de Pago -->
       <div class="w-full lg:w-80">
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 sticky top-24">
-          <h2 class="text-lg font-bold text-slate-900 mb-4 border-b pb-4">Resumen</h2>
-          <div class="flex justify-between font-bold text-xl text-slate-900 mt-4">
-            <span>Total</span>
-            <span>S/ {{ getTotal() }}</span>
+          <h2 class="text-lg font-bold text-slate-900 mb-4 border-b border-gray-100 pb-4">Resumen del Pedido</h2>
+          
+          <div class="space-y-3 text-sm">
+            <div class="flex justify-between text-slate-600">
+              <span>Subtotal</span>
+              <span>S/ {{ getTotal() }}</span>
+            </div>
+            <div class="flex justify-between text-slate-600">
+              <span>Envío</span>
+              <span>Calculado en el checkout</span>
+            </div>
+            <div class="border-t border-gray-100 pt-3 mt-3 flex justify-between font-bold text-xl text-slate-900">
+              <span>Total</span>
+              <span>S/ {{ getTotal() }}</span>
+            </div>
           </div>
-          <button class="w-full mt-6 bg-slate-900 text-white py-3 rounded-xl font-bold hover:bg-slate-800">
+          
+          <!-- 👇 BOTÓN CONECTADO A LA LÓGICA 👇 -->
+          <button (click)="goToCheckout()" 
+                  [disabled]="cartService.cartItems().length === 0"
+                  class="w-full mt-6 bg-slate-900 text-white py-3.5 rounded-xl font-bold text-lg hover:bg-slate-800 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
             Proceder al Pago
           </button>
+          
+          <p class="text-xs text-center text-slate-400 mt-4 flex items-center justify-center gap-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+            Compra 100% segura
+          </p>
         </div>
       </div>
+
     </div>
   </div>
 </div>

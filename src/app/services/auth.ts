@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Router } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
+import { ToastrService } from '@openng/ngx-toastr';
 
 @Injectable({
   providedIn: 'root',
@@ -12,6 +13,7 @@ export class Auth {
 
   private apiUrl = environment.apiUrl;
   private platformId = inject(PLATFORM_ID);
+  private toastr = inject(ToastrService);
 
   constructor(private http: HttpClient, private router: Router) { }
 
@@ -58,7 +60,7 @@ export class Auth {
     return null; // Si estamos en el servidor, devuelve null
   }
 
-  logout() {
+  logout(isExpired: boolean = false) {
 
     if (isPlatformBrowser(this.platformId)) {
 
@@ -69,7 +71,18 @@ export class Auth {
 
     this.currentUser.set(null);
 
-    this.router.navigate(['/login']);
+    if (isExpired) {
+
+      this.toastr.warning('Tu sesión ha expirado. Ingresa de nuevo.', 'Sesión Expirada');
+
+      setTimeout(() => {
+
+        this.router.navigate(['/login']);
+      }, 2000);
+    } else {
+
+      this.router.navigate(['/login']);
+    }
   }
 
   getToken() {

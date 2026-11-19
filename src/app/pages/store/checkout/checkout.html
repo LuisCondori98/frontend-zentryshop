@@ -1,0 +1,170 @@
+<div class="bg-gray-50 min-h-screen py-10 sm:py-16">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    
+    <div class="mb-8">
+      <h1 class="text-3xl font-extrabold text-slate-900">Finalizar Compra</h1>
+      <p class="text-slate-500 mt-1">Estás a un paso de recibir tus productos.</p>
+    </div>
+
+    <!-- 👇 EL FORMULARIO ENVUELVE TODAS LAS SECCIONES 👇 -->
+    <form [formGroup]="checkoutForm" (ngSubmit)="processPayment()" class="flex flex-col lg:flex-row gap-8">
+      
+      <!-- COLUMNA IZQUIERDA: Formulario -->
+      <div class="flex-1 space-y-6">
+        
+        <!-- SECCIÓN 1: Dirección de Envío -->
+        <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-100">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-slate-900 text-white text-xs flex items-center justify-center">1</span>
+              Dirección de Envío
+            </h2>
+            <a routerLink="/mis-direcciones" class="text-sm font-medium text-slate-600 hover:text-slate-900 underline">Gestionar direcciones</a>
+          </div>
+
+          <div *ngIf="addresses.length > 0" class="space-y-3 mb-6">
+            <p class="text-sm text-slate-500 mb-2">Selecciona una dirección guardada:</p>
+            <label *ngFor="let addr of addresses" class="flex items-start gap-3 p-4 border rounded-xl cursor-pointer hover:bg-gray-50 transition-colors" [ngClass]="selectedAddressId === addr.id ? 'border-slate-900 bg-slate-50' : 'border-gray-200'">
+              <input type="radio" name="address" [value]="addr.id" (change)="selectAddress(addr)" class="mt-1 w-4 h-4 text-slate-900 focus:ring-slate-900">
+              <div class="flex-1">
+                <div class="font-bold text-slate-900">{{ addr.alias || 'Dirección' }} <span class="text-xs font-normal text-slate-500 ml-2">{{ addr.isDefault ? '(Predeterminada)' : '' }}</span></div>
+                <div class="text-sm text-slate-600">{{ addr.recipientName }} - {{ addr.phone }}</div>
+                <div class="text-sm text-slate-600">{{ addr.addressLine1 }}, {{ addr.city }}</div>
+              </div>
+            </label>
+          </div>
+
+          <div>
+            <p class="text-sm font-bold text-slate-900 mb-3">{{ addresses.length > 0 ? 'O ingresa una nueva dirección:' : 'Ingresa tus datos de envío:' }}</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Nombre de quien recibe</label>
+                <input type="text" formControlName="shippingRecipient" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Teléfono</label>
+                <input type="text" formControlName="shippingPhone" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Distrito / Ciudad</label>
+                <input type="text" formControlName="shippingCity" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none">
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Dirección completa (Calle, número, dpto, referencia)</label>
+                <input type="text" formControlName="shippingAddress" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none">
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Provincia / Departamento</label>
+                <input type="text" formControlName="shippingState" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECCIÓN 2: Facturación (SUNAT) -->
+        <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-100">
+          <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2 mb-6">
+            <span class="w-6 h-6 rounded-full bg-slate-900 text-white text-xs flex items-center justify-center">2</span>
+            Datos de Facturación (Boleta/Factura)
+          </h2>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Tipo de Documento</label>
+              <select formControlName="billingDocType" (change)="onDocTypeChange()" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none bg-white">
+                <option value="DNI">DNI (Boleta)</option>
+                <option value="RUC">RUC (Factura)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Número de Documento</label>
+              <input type="text" formControlName="billingDocNumber" placeholder="Ej: 12345678" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none">
+            </div>
+            <div class="md:col-span-2" *ngIf="checkoutForm.get('billingDocType')?.value === 'RUC'">
+              <label class="block text-sm font-medium text-slate-700 mb-1">Razón Social (Nombre de la empresa)</label>
+              <input type="text" formControlName="billingName" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none">
+            </div>
+          </div>
+        </div>
+
+        <!-- SECCIÓN 3: Método de Pago -->
+        <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-100">
+          <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2 mb-6">
+            <span class="w-6 h-6 rounded-full bg-slate-900 text-white text-xs flex items-center justify-center">3</span>
+            Método de Pago
+          </h2>
+          
+          <div class="p-4 border border-slate-200 rounded-xl bg-slate-50 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div class="flex gap-2 flex-wrap">
+              <div class="w-12 h-8 bg-white border border-gray-200 rounded flex items-center justify-center shadow-sm">
+                <span class="text-xs font-bold text-blue-700 italic">VISA</span>
+              </div>
+              <div class="w-12 h-8 bg-white border border-gray-200 rounded flex items-center justify-center shadow-sm">
+                <span class="text-xs font-bold text-red-600">MC</span>
+              </div>
+              <div class="w-12 h-8 bg-purple-100 border border-purple-200 rounded flex items-center justify-center shadow-sm">
+                <span class="text-xs font-bold text-purple-700">Yape</span>
+              </div>
+              <div class="w-12 h-8 bg-teal-100 border border-teal-200 rounded flex items-center justify-center shadow-sm">
+                <span class="text-xs font-bold text-teal-700">Plin</span>
+              </div>
+            </div>
+            <div>
+              <p class="text-sm font-bold text-slate-900">Pago 100% Seguro</p>
+              <p class="text-xs text-slate-500">Al hacer clic en "Pagar", se abrirá la pasarela de Culqi para elegir Tarjeta, Yape o Plin.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- COLUMNA DERECHA: Resumen del Pedido -->
+      <div class="w-full lg:w-96">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 sticky top-24">
+          <h2 class="text-lg font-bold text-slate-900 mb-4 border-b border-gray-100 pb-4">Resumen del Pedido</h2>
+          
+          <div class="space-y-4 mb-6 max-h-64 overflow-y-auto pr-2">
+            <div *ngFor="let item of cartItems()" class="flex justify-between items-start gap-3">
+              <div class="flex gap-3">
+                <img [src]="item.variant.product.images[0]?.url || 'https://via.placeholder.com/50'" class="w-12 h-12 rounded-lg object-cover bg-gray-100 border border-gray-200">
+                <div>
+                  <p class="text-sm font-bold text-slate-900 leading-tight">{{ item.variant.product.name }}</p>
+                  <p class="text-xs text-slate-500">{{ item.variant.name }} (x{{ item.quantity }})</p>
+                </div>
+              </div>
+              <span class="text-sm font-bold text-slate-900">S/ {{ ((item.variant.price || item.variant.product.price) * item.quantity).toFixed(2) }}</span>
+            </div>
+          </div>
+
+          <div class="space-y-3 text-sm border-t border-gray-100 pt-4">
+            <div class="flex justify-between text-slate-600">
+              <span>Subtotal</span>
+              <span>S/ {{ subtotal }}</span>
+            </div>
+            <div class="flex justify-between text-slate-600">
+              <span>Envío</span>
+              <span>S/ {{ shippingCost }}</span>
+            </div>
+            <div class="flex justify-between font-bold text-lg text-slate-900 border-t border-gray-100 pt-3 mt-3">
+              <span>Total</span>
+              <span>S/ {{ total }}</span>
+            </div>
+          </div>
+
+          <!-- Botón de Pago (type="submit" para que use el ngSubmit del form) -->
+          <button type="submit" 
+                  [disabled]="checkoutForm.invalid || cartItems().length === 0" 
+                  class="w-full mt-6 bg-slate-900 text-white py-4 rounded-xl font-bold text-lg hover:bg-slate-800 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+            Pagar S/ {{ total }}
+          </button>
+
+          <p class="text-xs text-center text-slate-400 mt-4 flex items-center justify-center gap-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+            Pago 100% seguro y encriptado
+          </p>
+        </div>
+      </div>
+
+    </form>
+  </div>
+</div>

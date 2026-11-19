@@ -14,6 +14,7 @@ import { roleGuard } from './guards/role-guard';
 import { CartComponent } from './pages/store/cart/cart';
 import { AdminCategoriesComponent } from './pages/admin/categories/categories';
 import { MyAddresses } from './pages/store/my-addresses/my-addresses';
+import { Checkout } from './pages/store/checkout/checkout';
 
 export const routes: Routes = [
   {
@@ -37,6 +38,7 @@ export const routes: Routes = [
       { path: 'product/:slug', component: ProductDetail },
       { path: 'carrito', component: CartComponent },
       { path: 'mis-direcciones', component: MyAddresses },
+      { path: 'checkout', component: Checkout }
     ]
   },
   {

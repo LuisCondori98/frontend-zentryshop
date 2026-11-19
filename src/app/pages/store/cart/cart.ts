@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { CartService } from '../../../services/cart';
 
 @Component({
@@ -11,6 +11,7 @@ import { CartService } from '../../../services/cart';
 })
 export class CartComponent implements OnInit {
   cartService = inject(CartService);
+  router = inject(Router);
 
   ngOnInit() {
     this.cartService.loadCart();
@@ -25,5 +26,11 @@ export class CartComponent implements OnInit {
 
   removeItem(id: string) {
     this.cartService.removeItem(id).subscribe();
+  }
+
+  goToCheckout() {
+    if (this.cartService.cartItems().length > 0) {
+      this.router.navigate(['/checkout']);
+    }
   }
 }
